@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Weather App</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Poppins', sans-serif;
+    }
+
+    body {
+      height: 100vh;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .weather-app {
+      background: #ffffffcc;
+      backdrop-filter: blur(20px);
+      padding: 2.5rem;
+      border-radius: 1.5rem;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+      width: 380px;
+      text-align: center;
+    }
+
+    .app-header {
+      margin-bottom: 1.5rem;
+    }
+
+    .app-header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      color: #333;
+    }
+
+    .time-location {
+      font-size: 0.95rem;
+      margin-top: 0.3rem;
+      color: #555;
+    }
+
+    .weather-icon {
+      width: 120px;
+      height: 120px;
+      margin: 1rem auto;
+    }
+
+    .weather-details {
+      font-size: 1.1rem;
+      color: #222;
+      margin-top: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+    }
+
+    .menu {
+      margin-bottom: 1rem;
+    }
+
+    .menu select {
+      padding: 0.5rem 1rem;
+      border-radius: 0.5rem;
+      border: none;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="weather-app">
+    <div class="menu">
+      <select id="citySelect">
+        <option value="Delhi">Delhi</option>
+        <option value="New York">New York</option>
+        <option value="Tokyo">Tokyo</option>
+        <option value="London">London</option>
+        <option value="Sydney">Sydney</option>
+      </select>
+    </div>
+    <div class="app-header">
+      <h1 id="cityName">Weather in Delhi</h1>
+      <p class="time-location" id="currentTime"></p>
+    </div>
+    <img id="icon" class="weather-icon" src="" alt="Weather Icon" style="display: none;" />
+    <div id="weather" class="weather-details">
+      Loading...
+    </div>
+  </div>
+
+  <script>
+    const API_KEY = 'ac42fd500ca8e4f43e3b16aa2aa7a2f1';
+    const citySelect = document.getElementById('citySelect');
+    const cityName = document.getElementById('cityName');
+    const currentTime = document.getElementById('currentTime');
+
+    function updateTime() {
+      const now = new Date();
+      currentTime.innerText = now.toLocaleString();
+    }
+
+    async function fetchWeather(city) {
+      const URL = `https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&appid=${API_KEY}&units=metric`;
+      try {
+        const res = await fetch(URL);
+        const data = await res.json();
+
+        if (data.cod === 200) {
+          const temp = data.main.temp;
+          const description = data.weather[0].description;
+          const humidity = data.main.humidity;
+          const iconCode = data.weather[0].icon;
+
+          cityName.innerText = `Weather in ${data.name}`;
+          document.getElementById('icon').src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+          document.getElementById('icon').style.display = 'block';
+
+          document.getElementById('weather').innerHTML = `
+            <p><strong>Temperature:</strong> ${temp}&deg;C</p>
+            <p><strong>Condition:</strong> ${description}</p>
+            <p><strong>Humidity:</strong> ${humidity}%</p>
+          `;
+        } else {
+          document.getElementById('weather').innerText = 'City not found.';
+        }
+      } catch (error) {
+        document.getElementById('weather').innerText = 'Failed to fetch weather data.';
+      }
+    }
+
+    citySelect.addEventListener('change', () => {
+      fetchWeather(citySelect.value);
+    });
+
+    updateTime();
+    setInterval(updateTime, 60000); // update every minute
+    fetchWeather(citySelect.value);
+  </script>
+</body>
+
+</html>
